@@ -9,15 +9,36 @@ permission; freshness is not presence; a contact report is not human consent.
 
 ## Status
 
-This is the initial research workspace and specification scaffold. The shared
-verifier, visual protocol and tactile protocol are proposed work, not deployed
-security mechanisms. OpenAVT is the existing experimental voice implementation.
+Experimental implementations now exist for scoped visual and tactile evidence,
+backed by a shared local verification/authorization package. OpenAVT remains the
+independent experimental voice implementation. No general cross-modal composition
+proof, acquisition scheduler, cloud deployment or physical sensor/camera study is
+claimed.
 
-| Submodule | Purpose | Maturity |
+| Component | Purpose | Evidence boundary |
 | --- | --- | --- |
-| [openavt](https://github.com/ketanbj/openavt) | Protected structured requests over voice audio | Experimental implementation |
-| [openast](https://github.com/ketanbj/openast) | Open Agent Sight Trust | Design scaffold |
-| [openatt](https://github.com/ketanbj/openatt) | Open Agent Tactile Trust | Exploratory design scaffold |
+| `core/` | Exact actions, per-modality issuer keys, separate one-use grants, current revocation and atomic local receipts | Implemented local reference; not a remote/physical effect guarantee |
+| [openavt](https://github.com/ketanbj/openavt) | Protected structured requests over audio | Experimental local voice implementation |
+| [openast](https://github.com/ketanbj/openast) | Signed visual statements through actual QR images | Generated-raster and policy benchmarks; no camera deployment |
+| [openatt](https://github.com/ketanbj/openatt) | Signed controller force/time reports | Generated-signal and policy benchmarks; no hardware or consent proof |
+
+## Run the new adapters
+
+After cloning recursively:
+
+```sh
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -e core -e modalities/openast -e modalities/openatt pytest
+python -m openast demo --output output/sight
+python -m openatt demo --output output/tactile
+python -m pytest core/tests modalities/openast/tests modalities/openatt/tests
+```
+
+These are local source packages; no PyPI publication is asserted. See
+[shared core](core/README.md), [evidence index](research/README.md) and
+[local signing profile](spec/local-profile.md). The decoder or a schema validator
+alone does not authenticate evidence. A model cannot mint its own permission.
 
 ## Clone the workspace
 
@@ -42,9 +63,9 @@ its gitlink here. [Development workflow](docs/development.md).
 ```text
 docs/           architecture, threat model, assumptions and roadmap
 spec/           draft claims/evidence/action contracts
-core/           shared verification design
+core/           implemented bounded verifier and local receipt gate
 conformance/    common adapter requirements
-benchmarks/     attack taxonomy and evaluation plans
+benchmarks/     measured evidence index and future evaluation scope
 integrations/   Bedrock, AgentCore/Cedar and backend plans
 examples/       workflows spanning modalities
 research/       evidence index and research direction
