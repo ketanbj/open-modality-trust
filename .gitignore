@@ -5,3 +5,12 @@ output/
 .env
 *.key
 .DS_Store
+
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+build/
+dist/
+*.sqlite3
+*.sqlite3-*
+research/proposals/
