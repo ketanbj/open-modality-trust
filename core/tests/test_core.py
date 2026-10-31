@@ -120,6 +120,16 @@ def test_revoke_cannot_be_undone_by_registration(fixture):
     assert not gateway.effects()
 
 
+def test_revocation_before_registration_is_durable(fixture):
+    gateway, _, owner, action, _, _, evidence, now = fixture
+    token = grant(owner, action, "backend", now=now[0])
+    gateway.revoke_grant(unpack(token)["protected"]["body"]["id"])
+    gateway.register_grant(token)
+    with pytest.raises(Denied, match="grant-inactive"):
+        gateway.commit(evidence, token, action, Contract("sight"))
+    assert not gateway.effects()
+
+
 @pytest.mark.parametrize("issuer", ["owner", "display"])
 def test_current_issuer_revocation(fixture, issuer):
     gateway, _, _, action, _, token, evidence, _ = fixture

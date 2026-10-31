@@ -158,6 +158,7 @@ SERIAL_CASES = [
     "expired-challenge",
     "expired-grant",
     "revoked-grant",
+    "revoked-before-registration",
     "revoked-attester",
     "revoked-delegator",
     "unregistered-grant",
@@ -222,6 +223,12 @@ def serial_benchmark(modality: str, repetitions: int = 10, extra_cases=()) -> di
                 elif case == "revoked-grant":
                     f.revoked = True
                     f.gateway.revoke_grant(unpack(token)["protected"]["body"]["id"])
+                elif case == "revoked-before-registration":
+                    token = grant(f.owner, action, "backend", now=f.now, modalities=(modality,))
+                    f.gateway.revoke_grant(unpack(token)["protected"]["body"]["id"])
+                    f.gateway.register_grant(token)
+                    f.registered_digest = digest(unpack(token))
+                    f.revoked = True
                 elif case in {"revoked-attester", "revoked-delegator"}:
                     f.issuer_revoked = True
                     f.gateway.revoke_issuer("attester" if case == "revoked-attester" else "owner")

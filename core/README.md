@@ -29,7 +29,8 @@ accepted assumptions, and a separately signed grant. The verifier derives
 accepted guarantees. An adapter cannot supply a universal trust flag.
 Unsupported proximity, scene truth and human consent remain unsupported.
 
-Evidence and grants have different signing roles and trust maps. The gateway's
+Evidence keys are configured per modality; a display key cannot impersonate a
+controller. Evidence and grants have different signing roles and trust maps. The gateway's
 clock, configured keys, process and SQLite administrator are trusted. The local
 profile rejects duplicate JSON keys, floats, excessive input and unknown fields;
 it uses domain-separated Ed25519 signatures. It is not JOSE, COSE, RFC 8785 or
@@ -40,7 +41,8 @@ encrypt public QR evidence or force traces.
 challenge/grant consumption and receipt insertion in one SQLite transaction.
 Revocation committed first prevents a later receipt; subsequent revocation
 cannot undo an already committed receipt. Failed insertion rolls back consumption.
-Restart retains replay state. There is no arbitrary handler callback in this
+Restart retains replay state. Revocation tombstones also survive registration
+that happens after revocation. There is no arbitrary handler callback in this
 claim: HTTP calls and actuators require their own participating effect boundary.
 Deployments need authenticated enrollment, protected keys, retention/expiry
 cleanup, a trustworthy clock and operational hardening.
