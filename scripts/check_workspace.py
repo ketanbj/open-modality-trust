@@ -16,8 +16,10 @@ def git(root, *args):
 def check(root, require_checkouts=False):
     modules = configparser.ConfigParser(interpolation=None)
     modules.read(root / ".gitmodules")
-    expected = {f"modalities/{name}": f"https://github.com/ketanbj/{name}.git"
-                for name in ("openavt", "openast", "openatt")}
+    expected = {
+        f"modalities/{name}": f"https://github.com/ketanbj/{name}.git"
+        for name in ("openavt", "openast", "openatt")
+    }
     actual = {modules[section]["path"]: modules[section]["url"] for section in modules.sections()}
     if actual != expected:
         raise ValueError("Submodule paths/URLs do not match the documented workspace")
