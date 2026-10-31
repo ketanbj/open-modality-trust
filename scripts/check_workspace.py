@@ -41,6 +41,19 @@ def check(root, require_checkouts=False):
                 raise ValueError(f"{path} differs from its pinned commit")
             if not (module / "README.md").is_file():
                 raise ValueError(f"{path} has no README")
+            entrypoints = (
+                "AGENTS.md",
+                "Makefile",
+                "docs/README.md",
+                "docs/code-map.md",
+                "docs/development.md",
+                "scripts/check_docs.py",
+            )
+            missing = [entry for entry in entrypoints if not (module / entry).is_file()]
+            if missing:
+                raise ValueError(
+                    f"{path} is missing documentation entrypoints: {', '.join(missing)}"
+                )
             if path.endswith(("openast", "openatt")):
                 metadata = json.loads((module / "project.json").read_text())
                 statuses = {

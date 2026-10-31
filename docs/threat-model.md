@@ -13,7 +13,7 @@ OpenAVT authenticates cryptographic endpoints and protected structured messages;
 ordinary speech is outside its inner secure channel. Visual challenge-response
 alone does not prove proximity. A signed tactile report authenticates a reporting
 controller, not necessarily the toucher or their intent. Robot collision safety
-and general sensor truth are outside this scaffold's claims.
+and general sensor truth are outside the project's claims.
 
 Strict revocation requires a cooperating effect boundary. A pre-handler check is
 not automatically atomic with a later remote or physical effect. Unsupported
