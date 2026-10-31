@@ -17,7 +17,7 @@ def fixture(tmp_path):
     gateway = Gateway(
         str(tmp_path / "state.sqlite3"),
         audience="backend",
-        attesters={"display": display.public_key},
+        attesters={"sight": {"display": display.public_key}},
         delegators={"owner": owner.public_key},
         clock=lambda: now[0],
     )
@@ -61,7 +61,7 @@ def test_role_confusion_and_tampering(fixture):
     altered = unpack(evidence)
     altered["protected"]["body"]["observation"]["resource"] = "order/99"
     with pytest.raises(ValueError):
-        verify(canonical(altered), gateway.attesters, "sight-evidence")
+        verify(canonical(altered), gateway.attesters["sight"], "sight-evidence")
 
 
 @pytest.mark.parametrize(
@@ -207,3 +207,24 @@ def test_receipt_contains_no_grant_or_raw_observation(fixture):
     result = gateway.commit(evidence, token, action, Contract("sight"))
     encoded = json.dumps(result)
     assert "signature" not in encoded and "observation" not in encoded and "nonce" not in encoded
+
+
+def test_display_key_cannot_impersonate_controller(fixture):
+    from openatt import respond as tactile_response
+    from openatt import simulate
+
+    gateway, display, owner, action, _, _, _, now = fixture
+    challenge = gateway.challenge(action, "tactile")
+    evidence = tactile_response(display, challenge, action, simulate(challenge), now=now[0])
+    token = grant(owner, action, "backend", now=now[0], modalities=("tactile",))
+    gateway.register_grant(token)
+    with pytest.raises(Denied, match="invalid-evidence"):
+        gateway.commit(evidence, token, action, Contract("tactile"))
+    assert not gateway.effects()
+
+
+def test_different_modality_needs_fresh_evidence(fixture):
+    gateway, _, _, action, _, token, evidence, _ = fixture
+    with pytest.raises(Denied, match="invalid-evidence"):
+        gateway.commit(evidence, token, action, Contract("tactile"))
+    assert not gateway.effects()

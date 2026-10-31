@@ -65,7 +65,9 @@ def reference_accepts(evidence, token, action, contract, fixture) -> bool:
     or an independent audit. It has no atomic remote-effect or concurrency claim.
     """
     try:
-        protected = verify(evidence, fixture.gateway.attesters, contract.modality + "-evidence")
+        protected = verify(
+            evidence, fixture.gateway.attesters.get(contract.modality, {}), contract.modality + "-evidence"
+        )
         body = protected["body"]
         if set(body) != {"challenge", "observation"}:
             return False
@@ -115,7 +117,7 @@ class Fixture:
         self.gateway = Gateway(
             str(Path(directory) / "state.sqlite3"),
             audience="backend",
-            attesters={"attester": self.signer.public_key},
+            attesters={modality: {"attester": self.signer.public_key}},
             delegators={"owner": self.owner.public_key},
             clock=lambda: self.now,
         )
@@ -161,6 +163,7 @@ SERIAL_CASES = [
     "unregistered-grant",
     "wrong-grant-scope",
     "wrong-grant-modality",
+    "wrong-attester-modality",
     "consumed-replay",
     "unknown-observation-profile",
     "extra-observation-field",
@@ -239,6 +242,9 @@ def serial_benchmark(modality: str, repetitions: int = 10, extra_cases=()) -> di
                     )
                     f.gateway.register_grant(token)
                     f.registered_digest = digest(unpack(token))
+                elif case == "wrong-attester-modality":
+                    other = "tactile" if modality == "sight" else "sight"
+                    f.gateway.attesters = {other: {"attester": f.signer.public_key}}
                 elif case == "consumed-replay":
                     f.gateway.commit(evidence, token, action, contract)
                     f.consumed = True
@@ -272,7 +278,7 @@ def serial_benchmark(modality: str, repetitions: int = 10, extra_cases=()) -> di
                     evidence = f.signed_body(lambda body: body["observation"].update(samples=simulate(other)))
                 before = len(f.gateway.effects())
                 try:
-                    verify(evidence, f.gateway.attesters, modality + "-evidence")
+                    verify(evidence, f.gateway.attesters.get(modality, {}), modality + "-evidence")
                     signature_only = True
                 except ValueError:
                     signature_only = False

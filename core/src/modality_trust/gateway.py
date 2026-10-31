@@ -112,14 +112,17 @@ class Gateway:
         database: str,
         *,
         audience: str,
-        attesters: dict[str, bytes],
+        attesters: dict[str, dict[str, bytes]],
         delegators: dict[str, bytes],
         clock=None,
     ):
         self.database, self.audience = str(database), identifier(audience)
         if self.database == ":memory:":
             raise ValueError("use a file database for multi-connection transaction semantics")
-        self.attesters, self.delegators = dict(attesters), dict(delegators)
+        if not set(attesters) <= MODALITIES:
+            raise ValueError("configure attester keys by allowed modality")
+        self.attesters = {modality: dict(keys) for modality, keys in attesters.items()}
+        self.delegators = dict(delegators)
         self.clock = clock or (lambda: int(time.time()))
         with self._connect() as connection:
             connection.executescript("""
@@ -223,7 +226,9 @@ class Gateway:
         derived from the configured modality validator and this gateway's checks.
         """
         try:
-            protected = verify(evidence, self.attesters, contract.modality + "-evidence")
+            protected = verify(
+                evidence, self.attesters.get(contract.modality, {}), contract.modality + "-evidence"
+            )
             body = protected["body"]
             exact(body, ("challenge", "observation"))
             challenge = body["challenge"]
