@@ -1,9 +1,15 @@
-# Planned cross-modal examples
+# Runnable modality examples and future handoffs
 
-1. Voice-assisted pickup followed by visual kiosk interaction.
-2. Visual device configuration with an explicitly authorized backend change.
-3. An assistant handoff where a contact report is insufficient for user consent.
+After installing the core and updated modality checkouts:
 
-Examples will distinguish natural observations from authenticated structured
-claims. No dangerous physical actuation or real financial transaction is needed.
-Runnable voice-only demonstrations remain in the OpenAVT submodule.
+```sh
+python modalities/openast/examples/workflow.py
+python modalities/openatt/examples/workflow.py
+```
+
+The examples use the public SDKs, generated inputs, separate owner permission and
+a durable local receipt. Public fixture exporters produce signed synthetic raster
+or trace examples without writing private keys. OpenAVT supplies independent
+voice demos. A general voice-to-sight-to-touch handoff with composed guarantees is
+not implemented; it remains proposed research and must preserve assumptions,
+purpose, resource and episode rather than inherit universal trust.

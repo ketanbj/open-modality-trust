@@ -34,16 +34,29 @@ class Denied(PermissionError):
     """A stable reason code for fail-closed outcomes."""
 
 
+@dataclass(frozen=True, init=False)
 class Action:
     """An immutable snapshot, including all tool arguments and the user's purpose."""
+
+    _encoded: bytes
 
     def __init__(self, principal: str, action: str, resource: str, purpose: str, arguments: dict):
         for value in (principal, action, resource, purpose):
             identifier(value)
         if type(arguments) is not dict:
             raise ValueError("arguments must be an object")
-        self._encoded = canonical(
-            dict(principal=principal, action=action, resource=resource, purpose=purpose, arguments=arguments)
+        object.__setattr__(
+            self,
+            "_encoded",
+            canonical(
+                dict(
+                    principal=principal,
+                    action=action,
+                    resource=resource,
+                    purpose=purpose,
+                    arguments=arguments,
+                )
+            ),
         )
 
     @property
@@ -132,6 +145,7 @@ class Gateway:
                     id TEXT PRIMARY KEY, token_digest TEXT NOT NULL, revoked INTEGER NOT NULL DEFAULT 0,
                     consumed INTEGER NOT NULL DEFAULT 0);
                 CREATE TABLE IF NOT EXISTS revoked_issuers (issuer TEXT PRIMARY KEY);
+                CREATE TABLE IF NOT EXISTS revoked_grants (id TEXT PRIMARY KEY);
                 CREATE TABLE IF NOT EXISTS effects (
                     nonce TEXT PRIMARY KEY, request_digest TEXT NOT NULL, evidence_digest TEXT NOT NULL,
                     grant_id TEXT NOT NULL, committed_at INTEGER NOT NULL, receipt BLOB NOT NULL);
@@ -212,6 +226,7 @@ class Gateway:
     def revoke_grant(self, grant_id: str):
         with self._connect() as connection:
             connection.execute("BEGIN IMMEDIATE")
+            connection.execute("INSERT OR IGNORE INTO revoked_grants VALUES (?)", (identifier(grant_id),))
             connection.execute("UPDATE grants SET revoked=1 WHERE id=?", (identifier(grant_id),))
             connection.commit()
 
@@ -274,6 +289,8 @@ class Gateway:
             for issuer in (protected["issuer"], permission["issuer"]):
                 if connection.execute("SELECT 1 FROM revoked_issuers WHERE issuer=?", (issuer,)).fetchone():
                     raise Denied("issuer-revoked")
+            if connection.execute("SELECT 1 FROM revoked_grants WHERE id=?", (scope["id"],)).fetchone():
+                raise Denied("grant-inactive-or-consumed")
             row = connection.execute(
                 "SELECT document, consumed FROM challenges WHERE nonce=?", (challenge["nonce"],)
             ).fetchone()

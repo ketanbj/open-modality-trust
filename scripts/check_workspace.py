@@ -20,7 +20,10 @@ def check(root, require_checkouts=False):
         f"modalities/{name}": f"https://github.com/ketanbj/{name}.git"
         for name in ("openavt", "openast", "openatt")
     }
-    actual = {modules[section]["path"]: modules[section]["url"] for section in modules.sections()}
+    actual = {
+        modules[section]["path"]: modules[section]["url"]
+        for section in modules.sections()
+    }
     if actual != expected:
         raise ValueError("Submodule paths/URLs do not match the documented workspace")
     for path, url in sorted(actual.items()):
@@ -31,21 +34,37 @@ def check(root, require_checkouts=False):
         module = root / path
         if require_checkouts:
             if not (module / ".git").exists():
-                raise ValueError(f"{path} is not initialized; run git submodule update --init --recursive")
+                raise ValueError(
+                    f"{path} is not initialized; run git submodule update --init --recursive"
+                )
             if git(module, "rev-parse", "HEAD") != pinned:
                 raise ValueError(f"{path} differs from its pinned commit")
             if not (module / "README.md").is_file():
                 raise ValueError(f"{path} has no README")
             if path.endswith(("openast", "openatt")):
                 metadata = json.loads((module / "project.json").read_text())
-                if metadata["project"] != Path(path).name or metadata["implemented"] is not False:
-                    raise ValueError(f"{path} scaffold maturity metadata is inconsistent")
+                statuses = {
+                    "openast": "experimental-local-prototype",
+                    "openatt": "experimental-simulated-fixture",
+                }
+                name = Path(path).name
+                if (
+                    metadata["project"] != name
+                    or metadata["implemented"] is not True
+                    or metadata["status"] != statuses[name]
+                    or not (module / "pyproject.toml").is_file()
+                ):
+                    raise ValueError(
+                        f"{path} implementation maturity metadata is inconsistent"
+                    )
         print(f"{path}: {pinned[:12]} ({url})")
     for name in ("evidence", "action-contract"):
         schema = json.loads((root / "spec" / f"{name}.schema.json").read_text())
         if schema.get("$schema") != "https://json-schema.org/draft/2020-12/schema":
             raise ValueError(f"Unexpected schema dialect for {name}")
-    print("Workspace metadata checked; this is not cryptographic or protocol validation.")
+    print(
+        "Workspace metadata checked; this is not cryptographic or protocol validation."
+    )
 
 
 if __name__ == "__main__":
