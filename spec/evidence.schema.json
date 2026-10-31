@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ketanbj/open-modality-trust/spec/evidence.schema.json",
+  "title": "Draft evidence record; assertions are not verified claims",
+  "description": "Shape validation does not authenticate an issuer or establish a guarantee.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "evidence_id",
+    "modality",
+    "issuer",
+    "claim",
+    "interaction",
+    "freshness",
+    "asserted_guarantees",
+    "assumptions",
+    "proof_reference"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1-draft"
+    },
+    "evidence_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "modality": {
+      "enum": [
+        "voice",
+        "sight",
+        "tactile"
+      ]
+    },
+    "issuer": {
+      "type": "string",
+      "minLength": 1
+    },
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "subject",
+        "resource",
+        "value"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "minLength": 1
+        },
+        "subject": {
+          "type": "string",
+          "minLength": 1
+        },
+        "resource": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {}
+      }
+    },
+    "interaction": {
+      "type": "string",
+      "minLength": 1
+    },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "challenge",
+        "expires_at"
+      ],
+      "properties": {
+        "challenge": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expires_at": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "asserted_guarantees": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "issuer-key-control",
+          "message-integrity",
+          "fresh-response",
+          "resource-association",
+          "delegated-permission",
+          "reported-contact",
+          "human-consent",
+          "physical-proximity"
+        ]
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "proof_reference": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

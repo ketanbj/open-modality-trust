@@ -1,0 +1,12 @@
+[submodule "openavt"]
+	path = modalities/openavt
+	url = https://github.com/ketanbj/openavt.git
+	branch = main
+[submodule "openast"]
+	path = modalities/openast
+	url = https://github.com/ketanbj/openast.git
+	branch = main
+[submodule "openatt"]
+	path = modalities/openatt
+	url = https://github.com/ketanbj/openatt.git
+	branch = main

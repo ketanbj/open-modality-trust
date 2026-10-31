@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ketanbj/open-modality-trust/spec/action-contract.schema.json",
+  "title": "Draft action requirements; not an authorization grant",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "operation_id",
+    "principal",
+    "action",
+    "resource",
+    "purpose",
+    "interaction",
+    "required_guarantees",
+    "permitted_assumptions"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "0.1-draft"
+    },
+    "operation_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "principal": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resource": {
+      "type": "string",
+      "minLength": 1
+    },
+    "purpose": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interaction": {
+      "type": "string",
+      "minLength": 1
+    },
+    "required_guarantees": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "issuer-key-control",
+          "message-integrity",
+          "fresh-response",
+          "resource-association",
+          "delegated-permission",
+          "reported-contact",
+          "human-consent",
+          "physical-proximity"
+        ]
+      }
+    },
+    "permitted_assumptions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}
