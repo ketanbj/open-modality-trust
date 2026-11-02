@@ -10,6 +10,9 @@ OpenModalityTrust is an experimental open-source project for making those checks
 explicit and enforceable. It brings together modality-specific evidence and a
 shared permission gate, with decisions checked in code outside the language model.
 
+[Documentation map](docs/README.md) · [Glossary](docs/glossary.md) ·
+[Code map](docs/code-map.md) · [Agent guide](AGENTS.md)
+
 ## The problem: a convincing interaction can lead to the wrong action
 
 Imagine asking an assistant to collect order 42. It calls the store, reads a
@@ -104,16 +107,15 @@ cannot be inferred from the implemented signatures or contact patterns.
 ## Try the local prototypes
 
 Requires Python 3.11+. The demos use generated inputs and ephemeral keys; no API
-key, cloud account, or hardware is required. Clone the implementation branch:
+key, cloud account, or hardware is required. Clone the workspace:
 
 ```sh
-git clone --branch feat/scoped-modality-evidence --recurse-submodules https://github.com/ketanbj/open-modality-trust.git
+git clone --recurse-submodules https://github.com/ketanbj/open-modality-trust.git
 cd open-modality-trust
 python3 -m venv .venv
 source .venv/bin/activate
-python -m pip install -e core -e modalities/openast -e modalities/openatt pytest
-python -m openast demo --output output/sight
-python -m openatt demo --output output/tactile
+make install
+make demo
 ```
 
 The visual demo decodes a signed QR response, commits one permitted receipt,
@@ -123,11 +125,14 @@ requirement for human consent, and commits a receipt under its supported contrac
 Check the workspace and run the tests:
 
 ```sh
-python scripts/check_workspace.py --require-checkouts
-python -m pytest core/tests modalities/openast/tests modalities/openatt/tests
+make help
+make check
 ```
 
-Install these research packages from the checkout; no PyPI publication is asserted.
+Run these commands from the umbrella root. The [development guide](docs/development.md)
+has direct Python alternatives, checkout layouts and the child-before-parent
+publishing workflow. Install these research packages from the checkout; no PyPI
+publication is asserted.
 The [core guide](core/README.md) and [local signing profile](spec/local-profile.md)
 explain the implemented protocol. The shared JSON Schemas remain draft research
 contracts; schema validation alone does not authenticate evidence.

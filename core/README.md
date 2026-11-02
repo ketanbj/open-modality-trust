@@ -8,6 +8,10 @@ remote attestation system, or production authorization service.
 
 ## Install
 
+This package is maintained inside the umbrella repository. Run its Makefile and
+combined tests from the umbrella root, one level above this directory. The
+[core agent guide](AGENTS.md) maps the implementation and transaction invariants.
+
 From an umbrella checkout with the updated modality revisions:
 
 ```sh
